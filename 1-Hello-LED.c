@@ -13,13 +13,13 @@ Make sure the jumper connecting the LED to pin 1.0 is connected properly (It is 
 int main(void) {
     volatile int i; //Force the compliler to not optimize the variable 'i'
     WDTCTL = WDTPW | WDTHOLD;	//Stop watchdog timer
-    P1DIR|=0x01; //Set P1.0 as output pin
+    P1DIR|=BIT0; //Set P1.0 as output pin
 
     while(1) //Keep toggling the LED forever
     {
-        P1OUT^=0x01; //Toggle the pin state from HIGH to LOW or from LOW to HIGH
+        P1OUT^=BIT0; //Toggle the pin state from HIGH to LOW or from LOW to HIGH
         for(i=DELAY;i>0;i--); //Simple FOR loop to create the delay
     }
 
-return 0;
+	return 0;
 }
