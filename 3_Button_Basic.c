@@ -8,6 +8,8 @@ So when the button is pressed, P1.3 will be read as logical LOW and when the but
 When the button is pressed, this code turns on the LED and when it is not pressed, the LED is turned off.
 
 No debouncing is needed for this code as it will not affect the state of the LED noticeably.
+
+Make sure the jumper connecting the LED to pin 1.0 is connected properly (It is already connected by default)
 */
 #include <msp430.h> 
 
