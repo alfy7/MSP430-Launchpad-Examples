@@ -5,7 +5,7 @@ They would serve as reference so as to quickly get up and running with the MSP43
 ## Prerequisites
 
 I've used Code Composer Studio v7.1.0 for compiling these codes.
-You would need an MSP430G2553 and its Launchpad MSP-EXP430G3 to run these codes. 
+You would need an MSP430G2553 and its Launchpad MSP-EXP430G2 to run these codes. 
 
 ## Acknowledgments
 
