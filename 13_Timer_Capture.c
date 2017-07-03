@@ -46,33 +46,13 @@ int main(void)
 
     TA1CCR0=10000-1; //Setup Timer1 to overflow approximately every 0.01 seconds, to calculate time between key presses
     TA1CCTL1|=CM_3+CCIS_2+SCS+CAP+CCIE; //Setup Timer1 with synchronous capture on both edges, connected to Vcc
-                                        //and generate interrupt on capture
+    //and generate interrupt on capture
     TA1CTL|=TASSEL_2+MC_1+TAIE; //Setup Timer1 to run on SMCLK, UP mode and generate interrupt on overflow
 
     __enable_interrupt(); //Enable maskable interrupts
-    while(1)
-    {
 
-        if(press==0) //If press is zero, as in, there are an even number of key presses
-        {
-            time=((val2-val1)/10000)+overflow; //Calculate the time between the key presses
+    __low_power_mode_0(); //Go to low power mode 0
 
-            if(time<50) //If the time is less than 0.5 seconds
-            {
-                P1OUT|=BIT0;P1OUT&=~BIT6; //Turn on red LED
-            }
-            else if(time<100) //If time is less than 1 sec
-            {
-                P1OUT|=BIT6;P1OUT&=~(BIT0); //Turn on green LED
-            }
-            else
-            {
-                P1OUT|=(BIT0)|(BIT6); //Otherwise turn on both LEDs
-            }
-
-        }
-
-    }
 
     return 0;
 }
@@ -98,7 +78,22 @@ __interrupt void TMR1()
         else //If this is the second key press
         {
             val2=TA1CCR1; //Save the value of Timer1 at the time of second key press
-            press=0; //Reset press variable, the main function will calculate the time and take appropriate decision
+
+            time=((val2-val1)/10000)+overflow; //Calculate the time between the key presses
+
+            if(time<50) //If the time is less than 0.5 seconds
+            {
+                P1OUT|=BIT0;P1OUT&=~BIT6; //Turn on red LED
+            }
+            else if(time<100) //If time is less than 1 sec
+            {
+                P1OUT|=BIT6;P1OUT&=~(BIT0); //Turn on green LED
+            }
+            else
+            {
+                P1OUT|=(BIT0)|(BIT6); //Otherwise turn on both LEDs
+            }
+            press=0; //Reset press variable
         }
         TA1CCTL1&=~(CCIFG); //Reset Capture Flag
     }
@@ -119,26 +114,26 @@ __interrupt void P1_Function()
 __interrupt void TMR0()
 {
     if(TAIV==TA0IV_TAIFG)   //Check if Timer0 overflow caused the interrupt
-                            //This would be required in projects where multiple interrupts have
-                            //the same interrupt vector. Here it is only optional.
+        //This would be required in projects where multiple interrupts have
+        //the same interrupt vector. Here it is only optional.
+    {
+        if(state==((P1IN&BIT3)>>3)) //If the state of the LED is the same
+            count++; //Increment the counter variable
+        else
         {
-            if(state==((P1IN&BIT3)>>3)) //If the state of the LED is the same
-                count++; //Increment the counter variable
-            else
-            {
-                count=0; //If not same, reset the counter variable
-                state=((P1IN&BIT3)>>3); //And save the present state of the switch
-            }
+            count=0; //If not same, reset the counter variable
+            state=((P1IN&BIT3)>>3); //And save the present state of the switch
+        }
         if(count==10) //If the state has been consistently the same
-            {
+        {
             if(state==0) //If the switch was pressed
                 TA1CCTL1^=1<<12; //Trigger the Capture module
             P1IE|=BIT3; //We have handled the debouncing, now we again enable interrupt on P1.3, for it to again detect switch bounce
             TACTL=0; //Stop the Timer
             TACTL|=TACLR; //Clear the Timer counter
-            }
-
-            TACTL&=~(TAIFG); //Reset the interrupt flag
         }
+
+        TACTL&=~(TAIFG); //Reset the interrupt flag
+    }
 }
 
