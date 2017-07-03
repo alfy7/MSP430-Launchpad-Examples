@@ -4,10 +4,16 @@
  * Upon detection of a falling edge on the pin connected to the switch, the Port1 Interrupt is called
  * This in turn starts the Timer. Every 0.001 seconds, the Timer gives an interrupt, and the switch is read
  * If the switch remains in the same state for 10 checks in a row, we can confirm the state of the switch and
- * perform appropriate action.
+ * perform appropriate action. Here, we toggle the LED on P1.0
  *
- * Make sure the jumper connecting P1.0 to the LED is connected.
- * The cystall oscillator need not be connected. We are using the internal oscillator.
+ * In the main loop, we keep toggling on and off the LED on P1.6. Now, since we are using interrupts and debouncing,
+ * the switch press will have no noticeable effect on the continuous toggling of the LED connected to P1.6.
+ * This illustrates the fact that interrupts save a lot of processing time for the CPU which can now do other tasks
+ * more efficiently as compared to polling (Here, the task being toggling on and off the LED on P1.6). Achieving the same
+ * effect with the previous debouncing methods would be quite hard, if not impossible
+ *
+ * Make sure the jumper connecting P1.0 and P1.6 to the LEDs are connected.
+ * The crystal oscillator need not be connected. We are using the internal oscillator.
  */
 #include <msp430.h> 
 
@@ -26,10 +32,15 @@ int main(void) {
     TACCR0=1000; //Make the timer count from 0 to 10000, which will take  ~0.001 seconds
     __enable_interrupt(); //Enable maskable interrupts
 
-    P1DIR|=BIT0; //Set P1.0 as output
+    P1DIR|=BIT0|BIT6; //Set P1.0 and P1.6 as output
     P1OUT&=~BIT0; //Initially turn off the LED
 	
-    __low_power_mode_0(); //Go to low power mode 0
+   while(1) //Run code forever
+   {
+       P1OUT^=BIT6; //Toggle LED on P1.6
+       __delay_cycles(200000); //Delay for a while
+
+   }
 
 	return 0;
 }
