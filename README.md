@@ -1,4 +1,4 @@
-# MSP430-Launchpad-Examples
+# MSP430 Launchpad Examples
 This is a collection of basic code examples for the MSP430G2553.
 They would serve as reference so as to quickly get up and running with the MSP430G2553.
 
